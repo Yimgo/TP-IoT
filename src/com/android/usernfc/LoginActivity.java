@@ -13,7 +13,6 @@ public class LoginActivity extends Activity {
 	private TextView registerScreen;
 	private Button login;
 	private EditText etEmail;
-	private EditText etPwd;
 	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
