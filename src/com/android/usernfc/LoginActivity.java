@@ -1,18 +1,37 @@
 package com.android.usernfc;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class LoginActivity extends Activity {
 
+	private static final String TAG = LoginActivity.class.getName();
+	private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();
+	private static final String BASE_URL = "http://yimgo.fr:3000";
+	
 	private TextView registerScreen;
-	private Button login;
+	private Button btnLogin;
 	private EditText etEmail;
+	
+	private ProgressDialog mProgressDialog;
+	private HttpConnection con;
 	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
@@ -21,7 +40,10 @@ public class LoginActivity extends Activity {
         setContentView(R.layout.login);
  
         registerScreen = (TextView) findViewById(R.id.link_to_register);
-        login = (Button) findViewById(R.id.btnLogin);
+        btnLogin = (Button) findViewById(R.id.btnLogin);
+        etEmail = (EditText) findViewById(R.id.email);
+        
+        con = new HttpConnection();
  
         // Listening to register new account link
         registerScreen.setOnClickListener(new View.OnClickListener() {
@@ -34,14 +56,76 @@ public class LoginActivity extends Activity {
         });
         
         // Listening to login button
-        login.setOnClickListener(new View.OnClickListener() {
+        btnLogin.setOnClickListener(new View.OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
-				// TODO : check credentials
-				Intent homeIntent = new Intent(getApplicationContext(), HomeActivity.class);
-				startActivity(homeIntent);
+				String name = etEmail.getText().toString();
+				
+				if (name.length() != 0) {
+					String http_url = BASE_URL + "/users/signin";
+					
+					// check if you are connected or not
+			        if(!isConnected()){
+			        	Toast.makeText(getApplicationContext(), "You are NOT connected!", Toast.LENGTH_LONG).show();
+			        }
+			        else {
+			        	// call AsynTask to perform network operation on separate thread
+			        	
+			        	String totp_secret = getTotpSecret();
+					    new HttpsAsyncTask().execute(http_url, name, totp_secret);
+			        }
+				}
 			}
 		});
     }
+	
+	public boolean isConnected(){
+        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Activity.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+            if (networkInfo != null && networkInfo.isConnected()) 
+                return true;
+            else
+                return false;   
+    }
+	
+	private class HttpsAsyncTask extends AsyncTask<String, Void, String> {
+    	
+		@Override
+	    protected void onPreExecute() {
+    		super.onPreExecute();
+	        mProgressDialog = ProgressDialog.show(LoginActivity.this, "Wait", "Work in progress...");
+	        mProgressDialog.setCancelable(true);
+	    }
+    	
+        @Override
+        protected String doInBackground(String... args) {
+        	
+        	
+        	List<NameValuePair> params = new ArrayList<NameValuePair>();
+            params.add(new BasicNameValuePair("name", args[1]));
+            params.add(new BasicNameValuePair("totp_secret", args[2]));
+            
+            Log.d(TAG, "doInBackground - Initiating post request...");
+        	return con.postHttp(args[0], params);
+        }
+        
+        // onPostExecute displays the results of the AsyncTask.
+        @Override
+        protected void onPostExecute(String result) {
+        	mProgressDialog.dismiss();
+        	
+        	Log.d(TAG, result);
+       }
+    }
+	
+	public String getTotpSecret() {
+		Log.d(TAG, "doInBackground - Generating TOTP secret...");
+    	
+    	String totp_secret = TOTP.generateTOTP("72647973405845735257624e442626487d7b4963", Long.toHexString((System.currentTimeMillis() / 1000L) / 30).toUpperCase(), "6");
+    	
+    	Log.d(TAG, "TOTP secret: " + totp_secret);
+    	
+    	return totp_secret;
+	}
 }

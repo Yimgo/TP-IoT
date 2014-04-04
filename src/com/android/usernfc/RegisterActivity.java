@@ -1,30 +1,15 @@
 package com.android.usernfc;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.nfc.NfcAdapter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -39,12 +24,17 @@ public class RegisterActivity extends Activity {
 	private static final String TAG = RegisterActivity.class.getName();
 	
 	private static final String BASE_URL = "http://yimgo.fr:3000";
+	
+	// JSON Node names
+    private static final String TOTP_SECRET_ASCII = "totp_secret_ascii";
+    private static final String TOTP_SECRET_HEX = "totp_secret_hex";
 
 	private TextView loginScreen;
 	private Button btnRegister;
 	private EditText etEmail;
 	
 	private ProgressDialog mProgressDialog;
+	private HttpConnection con;
 	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
@@ -55,6 +45,8 @@ public class RegisterActivity extends Activity {
         loginScreen = (TextView) findViewById(R.id.link_to_login);
         btnRegister = (Button) findViewById(R.id.btnRegister);
         etEmail = (EditText) findViewById(R.id.reg_email);
+        
+        con = new HttpConnection();
  
         // Listening to Login Screen link
         loginScreen.setOnClickListener(new View.OnClickListener() {
@@ -70,7 +62,9 @@ public class RegisterActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				if (etEmail != null) {
+				String param = etEmail.getText().toString();
+				
+				if (param.length() != 0) {
 					String http_url = BASE_URL + "/users/signup";
 					
 					// check if you are connected or not
@@ -79,7 +73,7 @@ public class RegisterActivity extends Activity {
 			        }
 			        else {
 			        	// call AsynTask to perform network operation on separate thread
-					    new HttpsAsyncTask().execute(http_url);
+					    new HttpsAsyncTask().execute(http_url, param);
 			        }
 				}
 			}
@@ -105,12 +99,13 @@ public class RegisterActivity extends Activity {
 	    }
     	
         @Override
-        protected String doInBackground(String... urls) {
+        protected String doInBackground(String... args) {
         	Log.d(TAG, "doInBackground - Initiating post request...");
         	
         	List<NameValuePair> params = new ArrayList<NameValuePair>();
-            params.add(new BasicNameValuePair("name", "dangelo"));
-        	return postHttp(urls[0], params);
+            params.add(new BasicNameValuePair("name", args[1]));
+            
+        	return con.postHttp(args[0], params);
         }
         
         // onPostExecute displays the results of the AsyncTask.
@@ -118,59 +113,16 @@ public class RegisterActivity extends Activity {
         protected void onPostExecute(String result) {
         	mProgressDialog.dismiss();
         	
-        	// TODO Save secret to SE
+        	saveTotpSecret(result);
+        	
         	Log.d(TAG, result);
        }
     }
 	
-	public String postHttp(String url, List<NameValuePair> params) {
-		// Making the HTTP request
-		InputStream is = null;
-		JSONObject json = null;
-	    String outPut = "";
+	public void saveTotpSecret(String totp) {
+		Log.d(TAG, "saveTotpSecret - " + totp);
 		
-        try {
-             
-            DefaultHttpClient httpClient = new DefaultHttpClient();
-            HttpPost httpPost = new HttpPost(url);
-            httpPost.setEntity(new UrlEncodedFormEntity(params));
-            
-            HttpResponse httpResponse = httpClient.execute(httpPost);
-            HttpEntity httpEntity = httpResponse.getEntity();
-            is = httpEntity.getContent();
- 
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        
-        try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
-            StringBuilder sb = new StringBuilder();
-            String line = null;
-            while ((line = in.readLine()) != null) {
-                sb.append(line + "\n");
-            }
-            is.close();
-            outPut = sb.toString();
-            Log.e("JSON", outPut);
-        } catch (Exception e) {
-            Log.e("Buffer Error", "Error converting result " + e.toString());
-        }
- 
-        try {
-            json = new JSONObject(outPut);          
-        } catch (JSONException e) {
-            Log.e("JSON Parser", "Error parsing data " + e.toString());
-        }
- 
-        // return JSON String
-        if (json == null)
-        	return "";
-        
-        return json.toString();
+		
+		
 	}
 }
