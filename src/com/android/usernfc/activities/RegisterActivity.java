@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -26,6 +28,7 @@ public class RegisterActivity extends Activity {
 	
 	private static final String BASE_URL = "http://yimgo.fr:3000";
 	private static final String PATH = "/users/signup";
+	public static final String PREFS_NAME = "totp";
 
 	private TextView loginScreen;
 	private Button btnRegister;
@@ -104,14 +107,31 @@ public class RegisterActivity extends Activity {
         protected void onPostExecute(String result) {
         	mProgressDialog.dismiss();
         	
-        	Log.d(TAG, "responseCode: " + connectionHandler.getResponseStatusCode() / 100);
+        	Log.d(TAG, "responseCode: " + connectionHandler.getResponseStatusCode());
         	
         	if (connectionHandler.getResponseStatusCode() / 100 != 2) {
         		Toast.makeText(getApplicationContext(), "Something went wrong!", Toast.LENGTH_LONG).show();
         	}
         	else {
-        		// TODO : save secret
+        		// Retrieve hex totp secret from the response
+        		String totp_secret = parseJSON(connectionHandler.getResponseMessage(), "totp_secret_hex");
+        		
+        		// TODO : Save secret
         	}
        }
     }
+	
+	public String parseJSON(String data, String key) {
+		try {
+			JSONObject jObj = new JSONObject(data);
+			String value = jObj.getString(key);
+			
+			return value;
+			
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		
+		return "";
+	}
 }
