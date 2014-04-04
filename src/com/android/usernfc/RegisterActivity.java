@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -105,7 +107,9 @@ public class RegisterActivity extends Activity {
         	List<NameValuePair> params = new ArrayList<NameValuePair>();
             params.add(new BasicNameValuePair("name", args[1]));
             
-        	return con.postHttp(args[0], params);
+            String response = con.postHttp(args[0], params);
+            Log.d(TAG, "doInBackground - response: " + response);
+            return response;
         }
         
         // onPostExecute displays the results of the AsyncTask.
@@ -114,15 +118,25 @@ public class RegisterActivity extends Activity {
         	mProgressDialog.dismiss();
         	
         	saveTotpSecret(result);
-        	
-        	Log.d(TAG, result);
        }
     }
 	
 	public void saveTotpSecret(String totp) {
 		Log.d(TAG, "saveTotpSecret - " + totp);
 		
-		
+		if (totp != null) {
+            try {
+                JSONObject jsonObj = new JSONObject(totp);
+                String totp_secret_hex = jsonObj.getString(TOTP_SECRET_HEX);
+                
+                Log.d(TAG, totp_secret_hex);
+                
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        } else {
+            Log.d(TAG, "saveTotpSecret - Param 'totp' must not be null.");
+        }
 		
 	}
 }

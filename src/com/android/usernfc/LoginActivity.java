@@ -1,5 +1,6 @@
 package com.android.usernfc;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +24,6 @@ import android.widget.Toast;
 public class LoginActivity extends Activity {
 
 	private static final String TAG = LoginActivity.class.getName();
-	private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();
 	private static final String BASE_URL = "http://yimgo.fr:3000";
 	
 	private TextView registerScreen;
@@ -72,8 +72,8 @@ public class LoginActivity extends Activity {
 			        else {
 			        	// call AsynTask to perform network operation on separate thread
 			        	
-			        	String totp_secret = getTotpSecret();
-					    new HttpsAsyncTask().execute(http_url, name, totp_secret);
+			        	
+					    new HttpsAsyncTask().execute(http_url, name);
 			        }
 				}
 			}
@@ -101,10 +101,11 @@ public class LoginActivity extends Activity {
         @Override
         protected String doInBackground(String... args) {
         	
+        	String totp_secret = getTotpSecret();
         	
         	List<NameValuePair> params = new ArrayList<NameValuePair>();
             params.add(new BasicNameValuePair("name", args[1]));
-            params.add(new BasicNameValuePair("totp_secret", args[2]));
+            params.add(new BasicNameValuePair("totp_secret", totp_secret));
             
             Log.d(TAG, "doInBackground - Initiating post request...");
         	return con.postHttp(args[0], params);
@@ -122,9 +123,16 @@ public class LoginActivity extends Activity {
 	public String getTotpSecret() {
 		Log.d(TAG, "doInBackground - Generating TOTP secret...");
     	
-    	String totp_secret = TOTP.generateTOTP("72647973405845735257624e442626487d7b4963", Long.toHexString((System.currentTimeMillis() / 1000L) / 30).toUpperCase(), "6");
-    	
-    	Log.d(TAG, "TOTP secret: " + totp_secret);
+		String totp_secret = "";
+		
+		try {
+			Long networkTime = con.getNetworkTime(BASE_URL);
+	    	totp_secret = TOTP.generateTOTP("72647973405845735257624e442626487d7b4963", Long.toHexString((networkTime / 1000L) / 30).toUpperCase(), "6");
+	    	Log.d(TAG, "TOTP secret: " + totp_secret);
+	    	
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
     	
     	return totp_secret;
 	}
