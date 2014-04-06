@@ -15,7 +15,6 @@ import android.widget.Toast;
 
 import com.android.usernfc.R;
 
-
 public class BabamActivity extends Activity implements CreateNdefMessageCallback {
     NfcAdapter mNfcAdapter;
     TextView textView;
@@ -27,7 +26,7 @@ public class BabamActivity extends Activity implements CreateNdefMessageCallback
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.babam);
-
+        
 	    // get the intent and extract the message delivered by TagReaderActivity
 		Intent intent = getIntent();
 		username = intent.getStringExtra("username");
@@ -43,7 +42,7 @@ public class BabamActivity extends Activity implements CreateNdefMessageCallback
         // Register callback
         mNfcAdapter.setNdefPushMessageCallback(this, this);
     }
-
+    
     @Override
     public NdefMessage createNdefMessage(NfcEvent event) {
         NdefMessage msg = new NdefMessage(

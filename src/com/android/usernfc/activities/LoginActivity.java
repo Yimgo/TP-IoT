@@ -79,7 +79,7 @@ public class LoginActivity extends Activity {
 			        }
 			        else {
 			        	// call AsynTask to perform network operation on separate thread
-					    new HttpAsyncTask().execute(http_url, username);
+					    new HttpAsyncTask().execute(http_url, username, totp_secret);
 			        }
 				}
 				else {
@@ -92,6 +92,7 @@ public class LoginActivity extends Activity {
 	private class HttpAsyncTask extends AsyncTask<String, Void, String> {
     	
 		String name = "";
+		String totp_secret = "";
 		
 		@Override
 	    protected void onPreExecute() {
@@ -103,7 +104,7 @@ public class LoginActivity extends Activity {
         @Override
         protected String doInBackground(String... args) {
         	Log.d(TAG, "doInBackground - Generating TOTP secret...");
-        	String totp_token = getTotpToken();
+        	String totp_token = getTotpToken(args[2]);
         	
         	List<NameValuePair> params = new ArrayList<NameValuePair>();
             params.add(new BasicNameValuePair("name", args[1]));
@@ -113,6 +114,7 @@ public class LoginActivity extends Activity {
         	connectionHandler.makeServiceCall(args[0], ConnectionServiceHandler.POST, params);
         	
         	name = args[1];
+        	totp_secret = args[2];
         	
         	return "";
         }
@@ -123,17 +125,17 @@ public class LoginActivity extends Activity {
         	
         	Intent intent = new Intent(getApplicationContext(), BabamActivity.class);
 		    intent.putExtra("username", name);
-		    intent.putExtra("totp_secret", "3f673353286e495e353e51436e336e354c3f2856");
+		    intent.putExtra("totp_secret", totp_secret);
 		    startActivity(intent);
         }
 	}
 	
-	public String getTotpToken() {
+	public String getTotpToken(String totp_secret) {
 		String totp_token = "";
 
 		try {
 			Long networkTime = connectionHandler.getNetworkTime(BASE_URL);
-	    	totp_token = TOTP.generateTOTP("3f673353286e495e353e51436e336e354c3f2856", Long.toHexString((networkTime / 1000L) / 30).toUpperCase(), "6");
+	    	totp_token = TOTP.generateTOTP(totp_secret, Long.toHexString((networkTime / 1000L) / 30).toUpperCase(), "6");
 	    	Log.d(TAG, "TOTP token: " + totp_token);
 	    	
 		} catch (IOException e) {
