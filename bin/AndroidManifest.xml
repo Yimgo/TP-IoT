@@ -5,6 +5,8 @@
     android:versionName="1.0" >
 
     <uses-sdk android:minSdkVersion="18" android:targetSdkVersion="19" />
+    
+     <!-- NFC permission -->
     <uses-permission android:name="android.permission.NFC" />
 
     <uses-feature
@@ -34,7 +36,7 @@
             android:label="@string/title_activity_register" >
         </activity>
         <activity
-            android:name="com.android.usernfc.activities.MainActivity"
+            android:name="com.android.usernfc.activities.BabamActivity"
             android:label="@string/title_activity_home" >
             <intent-filter>
 			    <action android:name="android.nfc.action.NDEF_DISCOVERED" />

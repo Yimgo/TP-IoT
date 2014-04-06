@@ -17,7 +17,6 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,7 +33,9 @@ public class LoginActivity extends Activity {
 	
 	private TextView registerScreen;
 	private Button btnLogin;
-	private EditText etEmail;
+	
+	private String username = "";
+	private String totp_secret = "";
 	
 	private ProgressDialog mProgressDialog;
 	private ConnectionServiceHandler connectionHandler;
@@ -45,9 +46,11 @@ public class LoginActivity extends Activity {
         // setting default screen to login.xml
         setContentView(R.layout.login);
         
+        // check for preferences
+        setPreferences();
+        
         registerScreen = (TextView) findViewById(R.id.link_to_register);
         btnLogin = (Button) findViewById(R.id.btnLogin);
-        etEmail = (EditText) findViewById(R.id.email);
         
         connectionHandler = new ConnectionServiceHandler(getApplicationContext());
         
@@ -66,9 +69,8 @@ public class LoginActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				String name = etEmail.getText().toString();
 				
-				if (name.length() != 0) {
+				if (username.length() != 0 && totp_secret.length() != 0) {
 					String http_url = BASE_URL + PATH;
 					
 					// check if you are connected or not
@@ -77,15 +79,20 @@ public class LoginActivity extends Activity {
 			        }
 			        else {
 			        	// call AsynTask to perform network operation on separate thread
-					    new HttpsAsyncTask().execute(http_url, name);
+					    new HttpAsyncTask().execute(http_url, username);
 			        }
+				}
+				else {
+					Toast.makeText(getApplicationContext(), "You do not have an account! Please register.", Toast.LENGTH_LONG).show();
 				}
 			}
 		});
 	}
 	
-	private class HttpsAsyncTask extends AsyncTask<String, Void, String> {
+	private class HttpAsyncTask extends AsyncTask<String, Void, String> {
     	
+		String name = "";
+		
 		@Override
 	    protected void onPreExecute() {
     		super.onPreExecute();
@@ -96,41 +103,49 @@ public class LoginActivity extends Activity {
         @Override
         protected String doInBackground(String... args) {
         	Log.d(TAG, "doInBackground - Generating TOTP secret...");
-        	String totp_secret = getTotpSecret();
+        	String totp_token = getTotpToken();
         	
         	List<NameValuePair> params = new ArrayList<NameValuePair>();
             params.add(new BasicNameValuePair("name", args[1]));
-            params.add(new BasicNameValuePair("totp_secret", totp_secret));
+            params.add(new BasicNameValuePair("totp_secret", totp_token));
 
             Log.d(TAG, "doInBackground - Initiating post request...");
-            
-        	String response = "";//connectionHandler.makeServiceCall(args[0], ConnectionServiceHandler.POST, params);
-        	Log.d(TAG, "doInBackground - response: " + response);
+        	connectionHandler.makeServiceCall(args[0], ConnectionServiceHandler.POST, params);
         	
-        	return response;
+        	name = args[1];
+        	
+        	return "";
         }
         
         @Override
         protected void onPostExecute(String result) {
         	mProgressDialog.dismiss();
         	
-        	Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-        	startActivity(intent);
+        	Intent intent = new Intent(getApplicationContext(), BabamActivity.class);
+		    intent.putExtra("username", name);
+		    intent.putExtra("totp_secret", "3f673353286e495e353e51436e336e354c3f2856");
+		    startActivity(intent);
         }
 	}
 	
-	public String getTotpSecret() {
-		String totp_secret = "";
-		
+	public String getTotpToken() {
+		String totp_token = "";
+
 		try {
 			Long networkTime = connectionHandler.getNetworkTime(BASE_URL);
-	    	totp_secret = TOTP.generateTOTP("72647973405845735257624e442626487d7b4963", Long.toHexString((networkTime / 1000L) / 30).toUpperCase(), "6");
-	    	Log.d(TAG, "TOTP secret: " + totp_secret);
+	    	totp_token = TOTP.generateTOTP("3f673353286e495e353e51436e336e354c3f2856", Long.toHexString((networkTime / 1000L) / 30).toUpperCase(), "6");
+	    	Log.d(TAG, "TOTP token: " + totp_token);
 	    	
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
     	
-    	return totp_secret;
+    	return totp_token;
+	}
+	
+	public void setPreferences() {
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        username = prefs.getString("username", "");
+        totp_secret = prefs.getString("totp_secret", "");
 	}
 }

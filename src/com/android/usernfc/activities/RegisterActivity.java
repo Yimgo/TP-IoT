@@ -10,8 +10,10 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -28,7 +30,6 @@ public class RegisterActivity extends Activity {
 	
 	private static final String BASE_URL = "http://yimgo.fr:3000";
 	private static final String PATH = "/users/signup";
-	public static final String PREFS_NAME = "totp";
 
 	private TextView loginScreen;
 	private Button btnRegister;
@@ -74,15 +75,17 @@ public class RegisterActivity extends Activity {
 			        }
 			        else {
 			        	// call AsynTask to perform network operation on separate thread
-					    new HttpsAsyncTask().execute(http_url, param);
+					    new HttpAsyncTask().execute(http_url, param);
 			        }
 				}
 			}
 		});
     }
 	
-	private class HttpsAsyncTask extends AsyncTask<String, Void, String> {
+	private class HttpAsyncTask extends AsyncTask<String, Void, String> {
     	
+		String name = "";
+		
 		@Override
 	    protected void onPreExecute() {
     		super.onPreExecute();
@@ -98,6 +101,8 @@ public class RegisterActivity extends Activity {
             params.add(new BasicNameValuePair("name", args[1]));
             
             connectionHandler.makeServiceCall(args[0], ConnectionServiceHandler.POST, params);
+            
+            name = args[1];
             
             return "";
         }
@@ -115,8 +120,12 @@ public class RegisterActivity extends Activity {
         	else {
         		// Retrieve hex totp secret from the response
         		String totp_secret = parseJSON(connectionHandler.getResponseMessage(), "totp_secret_hex");
+        		Log.d(TAG, "totp_secret: " + connectionHandler.getResponseMessage());
         		
-        		// TODO : Save secret
+        		// Save secret and username on shared preferences
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                prefs.edit().putString("username", name).commit();
+                prefs.edit().putString("totp_secret", totp_secret).commit();
         	}
        }
     }
