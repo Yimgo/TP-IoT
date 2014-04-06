@@ -7,7 +7,7 @@
     <string name="login">Login</string>
     <string name="noAccount">New to SmartPlug? Register here</string>
     <string name="register">Register New Account</string>
-    <string name="hasAccount">Already has account! Login here</string>
+    <string name="hasAccount">Already has an account? Login here</string>
     <string name="title_activity_register">RegisterActivity</string>
     <string name="title_activity_home">HomeActivity</string>
 </resources>

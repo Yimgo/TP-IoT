@@ -10,6 +10,7 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -126,6 +127,9 @@ public class RegisterActivity extends Activity {
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
                 prefs.edit().putString("username", name).commit();
                 prefs.edit().putString("totp_secret", totp_secret).commit();
+                
+                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                startActivity(intent);
         	}
        }
     }
