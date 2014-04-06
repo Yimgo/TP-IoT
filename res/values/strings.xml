@@ -9,5 +9,8 @@
     <string name="register">Register New Account</string>
     <string name="hasAccount">Already has an account? Login here</string>
     <string name="title_activity_register">RegisterActivity</string>
-    <string name="title_activity_home">HomeActivity</string>
+    <string name="title_activity_babam">BabamActivity</string>
+    <string name="title_activity_stats">StatsActivity</string>
+	<string name="stats_link">Link to stats</string>
+		
 </resources>

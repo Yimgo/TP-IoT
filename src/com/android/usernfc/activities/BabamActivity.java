@@ -10,15 +10,19 @@ import android.nfc.NfcEvent;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.usernfc.R;
 
 public class BabamActivity extends Activity implements CreateNdefMessageCallback {
-    NfcAdapter mNfcAdapter;
-    TextView textView;
-
+    
+	private NfcAdapter mNfcAdapter;
+    private TextView textView;
+    private Button btnStats;
+    
     private String username;
     private String totp_secret;
     
@@ -32,6 +36,15 @@ public class BabamActivity extends Activity implements CreateNdefMessageCallback
 		username = intent.getStringExtra("username");
 		totp_secret = intent.getStringExtra("totp_secret");
         
+		btnStats = (Button) findViewById(R.id.button_stats);
+		btnStats.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // Perform action on click
+            	Intent intent = new Intent(getApplicationContext(), StatsActivity.class);
+            	startActivity(intent);
+            }
+        });
+		
         // Check for available NFC Adapter
         mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
         if (mNfcAdapter == null) {
