@@ -10,9 +10,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -63,6 +63,12 @@ public class HistoryFragment extends Fragment {
 			}
             
             row.addView(t);
+            row.setPadding(15, 25, 0, 25);
+            
+            if (i%2 != 0){
+            	row.setBackgroundColor(Color.parseColor("#EEEEEE"));
+            }
+            
             table.addView(row);
     	}
     }
@@ -80,6 +86,13 @@ public class HistoryFragment extends Fragment {
     			data[1] = json.getString("authorization_power_consumption");
     			data[2] = json.getString("authorization_issue_time");
     			data[3] = json.getString("authorization_revocation_time");
+    			datas.add(data);
+    			datas.add(data);
+    			datas.add(data);
+    			datas.add(data);
+    			datas.add(data);
+    			datas.add(data);
+    			datas.add(data);
     			datas.add(data);
     		}
     		
