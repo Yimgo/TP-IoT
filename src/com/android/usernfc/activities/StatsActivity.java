@@ -35,7 +35,7 @@ public class StatsActivity extends FragmentActivity implements ActionBar.TabList
 
 	private static final String TAG = StatsActivity.class.getName();
 	
-	private static final String BASE_URL = "http://yimgo.fr:3000";
+	private static final String BASE_URL = "http://tpiotcloudapp-env.elasticbeanstalk.com";
 	private static final String PATH = "/users/:user/authorizations";
 	
 	private ProgressDialog mProgressDialog;
@@ -201,13 +201,11 @@ public class StatsActivity extends FragmentActivity implements ActionBar.TabList
         protected void onPostExecute(String result) {
         	mProgressDialog.dismiss();
         	
-        	Intent intentOnError = new Intent(getApplicationContext(), BabamActivity.class);
-        	
         	Log.d(TAG, "responseCode: " + connectionHandler.getResponseStatusCode());
         	
         	if (connectionHandler.getResponseStatusCode() / 100 != 2) {
         		Toast.makeText(getApplicationContext(), "Something went wrong!", Toast.LENGTH_LONG).show();
-        		startActivity(intentOnError);
+        		finish();
         	}
         	else {
 	        	Log.d(TAG, "Response body: " + connectionHandler.getResponseMessage());

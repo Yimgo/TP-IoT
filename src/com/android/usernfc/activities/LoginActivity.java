@@ -28,7 +28,7 @@ public class LoginActivity extends Activity {
     
 	private static final String TAG = LoginActivity.class.getName();
 	
-	private static final String BASE_URL = "http://yimgo.fr:3000";
+	private static final String BASE_URL = "http://tpiotcloudapp-env.elasticbeanstalk.com";
 	private static final String PATH = "/users/signin";
 	
 	private TextView registerScreen;

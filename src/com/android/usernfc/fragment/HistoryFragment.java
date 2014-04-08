@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -86,13 +87,6 @@ public class HistoryFragment extends Fragment {
     			data[1] = json.getString("authorization_power_consumption");
     			data[2] = json.getString("authorization_issue_time");
     			data[3] = json.getString("authorization_revocation_time");
-    			datas.add(data);
-    			datas.add(data);
-    			datas.add(data);
-    			datas.add(data);
-    			datas.add(data);
-    			datas.add(data);
-    			datas.add(data);
     			datas.add(data);
     		}
     		

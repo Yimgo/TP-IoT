@@ -12,7 +12,6 @@ import android.os.Parcelable;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.usernfc.R;
@@ -20,7 +19,6 @@ import com.android.usernfc.R;
 public class BabamActivity extends Activity implements CreateNdefMessageCallback {
     
 	private NfcAdapter mNfcAdapter;
-    private TextView textView;
     private Button btnStats;
     
     private String username;

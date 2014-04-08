@@ -20,7 +20,6 @@ import org.json.JSONObject;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -73,25 +72,25 @@ public class ConsumptionsFragment extends Fragment {
 				
 				switch (dayOfWeek){
 					case Calendar.MONDAY :
-						datas[0] = data;
+						datas[0] += data;
 						break;
 					case Calendar.TUESDAY :
-						datas[1] = data;
+						datas[1] += data;
 						break;
 					case Calendar.WEDNESDAY :
-						datas[2] = data;
+						datas[2] += data;
 						break;
 					case Calendar.THURSDAY :
-						datas[3] = data;
+						datas[3] += data;
 						break;
 					case Calendar.FRIDAY :
-						datas[4] = data;
+						datas[4] += data;
 						break;
 					case Calendar.SATURDAY :
-						datas[5] = data;
+						datas[5] += data;
 						break;
 					case Calendar.SUNDAY :
-						datas[6] = data;
+						datas[6] += data;
 						break;
 				}
 				
@@ -146,13 +145,13 @@ public class ConsumptionsFragment extends Fragment {
         renderer.setAxesColor(Color.WHITE);
         renderer.setShowGrid(true);
         renderer.setXAxisMin(0);
-        renderer.setXAxisMax(8);
+        renderer.setXAxisMax(7);
         renderer.setYAxisMin(0);
         renderer.setZoomEnabled(false);
         renderer.setYAxisMax(110);
         renderer.setXLabels(0);
         for(int i=0;i<7;i++){
-        	renderer.addXTextLabel(i+1, mDay[i]);
+        	renderer.addXTextLabel(i, mDay[i]);
         }
       }
 }
